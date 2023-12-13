@@ -38,18 +38,18 @@ def main():
     sock.listen(5)
     while True:
         obj, conn = sock.accept()
-        threading.Thread(target=handle, args=(obj,conn)).start()
+        threading.Thread(target=handle, args=(obj, conn)).start()
 
 
 def handle(obj, conn):  # Function for parsing commands, {'cmd':command}
     try:
         data = obj.recv(1024)
-    except:
+    except Exception as e:
         obj.close()
         return
     if not data:
         return
-    print conn[0], str(data)
+    print(conn[0], str(data, 'utf-8'))
     try:
         d = json.loads(data)
         cmd = ncmds[d['cmd']](obj, data)
@@ -62,12 +62,12 @@ def handle(obj, conn):  # Function for parsing commands, {'cmd':command}
             "success": False,
             "message": "Unable to parse JSON request",
             "payload": {
-                "request": data
+                "request": data.decode('utf-8')
             }
-        }))
+        }).encode('utf-8'))
     except Exception as e:
-        # If data is not in the json format it will log the error.
-        print e
+        # If data is not in the JSON format it will log the error.
+        print(e)
 
 if __name__ == "__main__":
     main()
