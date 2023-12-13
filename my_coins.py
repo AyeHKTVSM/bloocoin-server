@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-import mongo
+import mongo  # Ensure correct import as per your MongoDB driver
 import command
-
 
 class MyCoins(command.Command):
     """ Allows users to check the amount of coins
@@ -14,9 +12,10 @@ class MyCoins(command.Command):
     def handle(self, *args, **kwargs):
         addr = self.data['addr']
         pwd = self.data['pwd']
+        
+        # Assuming mongo.db is your MongoDB connection
         if mongo.db.addresses.find_one({"addr": addr, "pwd": pwd}):
-            coins = coins = mongo.db.coins.find({"addr": addr}).count()
-            self.success({"amount": coins})
-            return
+            coins_count = mongo.db.coins.count_documents({"addr": addr})
+            self.success({"amount": coins_count})
         else:
             self.error("Your address or password was invalid")
