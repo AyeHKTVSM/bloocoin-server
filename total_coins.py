@@ -9,4 +9,5 @@ class TotalCoins(command.Command):
     required = []
 
     def handle(self):
-        self.success({"amount":mongo.db.coins.count()})        
+        total_coins = mongo.db.coins.count_documents({})
+        self.success({"amount": total_coins})
