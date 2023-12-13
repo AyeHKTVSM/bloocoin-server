@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 import hashlib
 
@@ -14,18 +13,14 @@ class Command(object):
             self.data = json.loads(data)
             pre_hashed = 'x-pre-hashed' in self.data
             if 'pwd' in self.data and not pre_hashed:
-                self.data['pwd'] = hashlib.sha256(self.data['pwd']).hexdigest()
-        except ValueError, KeyError:
+                self.data['pwd'] = hashlib.sha256(self.data['pwd'].encode()).hexdigest()
+        except (ValueError, KeyError):
             self.error("Unable to decode request JSON")
             self._handle = False
             return
-        missing = []
-        for k in self.required:
-            if k in self.data:
-                continue
-            missing.append(k)
+        missing = [k for k in self.required if k not in self.data]
         if missing:
-            self.error("Missing keys: {0}".format(', '.join(missing)))
+            self.error("Missing keys: {}".format(', '.join(missing)))
             self._handle = False
             return
         # This is so we don't call handle() unless we should
@@ -39,7 +34,7 @@ class Command(object):
             "success": True,
             "message": message,
             "payload": payload
-        }))
+        }).encode())
         if close:
             self.sock.close()
 
@@ -48,6 +43,7 @@ class Command(object):
             "success": False,
             "message": message,
             "payload": payload
-        }))
+        }).encode())
         if close:
             self.sock.close()
+            
