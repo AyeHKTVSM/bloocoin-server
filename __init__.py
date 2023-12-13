@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-__version__ = "1.2.0-stable"
-# X.Y.Z-<branch>
+__version__ = "1.2.1-stable"
 
 import socket
 import get_coin
@@ -31,7 +29,7 @@ ncmds = {
 
 def main():
     port = 3122
-    sock = socket.socket()
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind(('0.0.0.0', port))
 
@@ -49,7 +47,7 @@ def handle(obj, conn):  # Function for parsing commands, {'cmd':command}
         return
     if not data:
         return
-    print(conn[0], str(data, 'utf-8'))
+    print(conn[0], data.decode('utf-8'))
     try:
         d = json.loads(data)
         cmd = ncmds[d['cmd']](obj, data)
@@ -58,7 +56,7 @@ def handle(obj, conn):  # Function for parsing commands, {'cmd':command}
     except ValueError as e:
         # If there's a decoding error, send them a reply,
         # so they're not just left hanging.
-        obj.send(json.dumps({
+        obj.sendall(json.dumps({
             "success": False,
             "message": "Unable to parse JSON request",
             "payload": {
